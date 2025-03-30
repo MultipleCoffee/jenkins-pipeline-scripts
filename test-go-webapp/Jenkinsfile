@@ -1,1 +1,70 @@
+pipeline {
+    agent any
+
+    triggers {
+        pollSCM('H/5 * * * *')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                dir('go-webapp') {
+                    git 'https://github.com/your-org/go-webapp.git'
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir('go-webapp') {
+                    sh '''
+                        mkdir -p build
+                        go build -o build/myapp main.go
+                    '''
+                }
+            }
+        }
+        /*
+        stage('Test') {
+            steps {
+                dir('go-webapp') {
+                    sh 'go test ./...'
+                }
+            }
+        }
+        */
+
+        stage('Prepare Artifact') {
+            steps {
+                dir('go-webapp') {
+                    sh 'cp -r templates static build/'
+                }
+            }
+        }
+
+        stage('Deploy & Run') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'target_ip', variable: 'TARGET_IP'),
+                    string(credentialsId: 'test_goapp_port', variable: 'PORT'),
+                    string(credentialsId: 'test_goapp_title', variable: 'APP_TITLE'),
+                    usernamePassword(credentialsId: 'vm1_ssh_login', usernameVariable: 'SSH_USER', passwordVariable: 'SSH_PASS')
+                ]) {
+                    sh '''
+                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$TARGET_IP \\
+                            'mkdir -p /opt/test-go-webapp'
+
+                        sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no -r go-webapp/build/* \\
+                            $SSH_USER@$TARGET_IP:/opt/test-go-webapp/
+
+                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$TARGET_IP \\
+                            'pkill -x test-go-webapp || true && \\
+                             PORT=$PORT APP_TITLE="$APP_TITLE" \\
+                             nohup /opt/test-go-webapp/test-go-webapp > /dev/null 2>&1 &'
+                    '''
+                }
+            }
+        }
+    }
+}
 
