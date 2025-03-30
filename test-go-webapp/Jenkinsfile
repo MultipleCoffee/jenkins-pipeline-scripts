@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 dir('test-go-webapp') {
-                    git 'https://github.com/MultipleCoffee/cicd-practice.git'
+                    git branch: 'main', url: 'https://github.com/MultipleCoffee/cicd-practice.git'
                 }
             }
         }
