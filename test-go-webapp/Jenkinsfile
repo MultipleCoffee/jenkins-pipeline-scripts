@@ -60,9 +60,7 @@ pipeline {
                             $SSH_USER@$TARGET_IP:/home/$TARGET_USER/test-go-webapp/
                 
                         sshpass -p "$SSH_PASS" ssh -p $SSH_PORT -o StrictHostKeyChecking=no $SSH_USER@$TARGET_IP \
-                            "pkill -x test-go-webapp || true && \
-                             PORT=$PORT APP_TITLE='$APP_TITLE' \
-                             nohup /home/$TARGET_USER/test-go-webapp/test-go-webapp > /dev/null 2>&1 &"
+                            "pkill -x test-go-webapp || true; PORT=$PORT APP_TITLE=\"$APP_TITLE\" nohup /home/$TARGET_USER/test-go-webapp/test-go-webapp > /dev/null 2>&1 & exit 0"
                     '''
                 }
             }
