@@ -8,18 +8,18 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                dir('go-webapp') {
-                    git 'https://github.com/your-org/go-webapp.git'
+                dir('test-go-webapp') {
+                    git 'https://github.com/MultipleCoffee/cicd-practice.git'
                 }
             }
         }
 
         stage('Build') {
             steps {
-                dir('go-webapp') {
+                dir('test-go-webapp') {
                     sh '''
                         mkdir -p build
-                        go build -o build/myapp main.go
+                        go build -o build/test-go-webapp main.go
                     '''
                 }
             }
@@ -27,7 +27,7 @@ pipeline {
         /*
         stage('Test') {
             steps {
-                dir('go-webapp') {
+                dir('test-go-webapp') {
                     sh 'go test ./...'
                 }
             }
@@ -36,7 +36,7 @@ pipeline {
 
         stage('Prepare Artifact') {
             steps {
-                dir('go-webapp') {
+                dir('test-go-webapp') {
                     sh 'cp -r templates static build/'
                 }
             }
