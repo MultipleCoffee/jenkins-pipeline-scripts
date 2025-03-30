@@ -51,15 +51,15 @@ pipeline {
                     usernamePassword(credentialsId: 'vm1_ssh_login', usernameVariable: 'SSH_USER', passwordVariable: 'SSH_PASS')
                 ]) {
                     sh '''
-                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$TARGET_IP \\
+                        sshpass -p "$SSH_PASS" ssh -p 2222 -o StrictHostKeyChecking=no $SSH_USER@$TARGET_IP \
                             'mkdir -p /opt/test-go-webapp'
-
-                        sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no -r test-go-webapp/build/* \\
+        
+                        sshpass -p "$SSH_PASS" scp -P 2222 -o StrictHostKeyChecking=no -r test-go-webapp/build/* \
                             $SSH_USER@$TARGET_IP:/opt/test-go-webapp/
-
-                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$TARGET_IP \\
-                            'pkill -x test-go-webapp || true && \\
-                             PORT=$PORT APP_TITLE="$APP_TITLE" \\
+        
+                        sshpass -p "$SSH_PASS" ssh -p 2222 -o StrictHostKeyChecking=no $SSH_USER@$TARGET_IP \
+                            'pkill -x test-go-webapp || true && \
+                             PORT=$PORT APP_TITLE="$APP_TITLE" \
                              nohup /opt/test-go-webapp/test-go-webapp > /dev/null 2>&1 &'
                     '''
                 }
