@@ -53,14 +53,17 @@ pipeline {
                     usernamePassword(credentialsId: 'vm1_ssh_login', usernameVariable: 'SSH_USER', passwordVariable: 'SSH_PASS')
                 ]) {
                     sh '''
+                        # 止める（エラー無視）
                         sshpass -p "$SSH_PASS" ssh -p $SSH_PORT -o StrictHostKeyChecking=no $SSH_USER@$TARGET_IP \
-                            "mkdir -p /home/$TARGET_USER/test-go-webapp"
-                
+                            "sudo /bin/systemctl stop test-go-webapp.service || true"
+                    
+                        # コピー
                         sshpass -p "$SSH_PASS" scp -P $SSH_PORT -o StrictHostKeyChecking=no -r test-go-webapp/build/* \
                             $SSH_USER@$TARGET_IP:/home/$TARGET_USER/test-go-webapp/
-                
+                    
+                        # 再起動
                         sshpass -p "$SSH_PASS" ssh -p $SSH_PORT -o StrictHostKeyChecking=no $SSH_USER@$TARGET_IP \
-                            "sudo /bin/systemctl restart test-go-webapp.service"
+                            "sudo /bin/systemctl start test-go-webapp.service"
                     '''
                 }
             }
